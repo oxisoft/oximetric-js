@@ -1,6 +1,6 @@
 {
   "name": "oximetric",
-  "version": "0.1.0",
+  "version": "1.0.2",
   "description": "Lightweight, privacy-friendly visitor analytics for any website. Works with the self-hosted Oximetric server. Zero runtime dependencies, works in every browser, drop-in script tag or ESM import.",
   "type": "module",
   "main": "./dist/oximetric.cjs",
@@ -56,8 +56,7 @@
   "author": "OxiSoft",
   "license": "MIT",
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "devDependencies": {
     "esbuild": "^0.24.0"
