@@ -17,12 +17,20 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
       # Trusted Publishing requires npm 11.5.1+ (OIDC support).
-      - run: npm install -g npm@latest
+      # Node 24 already ships with npm 11.x; this just guarantees the floor.
+      - name: Ensure npm >= 11.5.1
+        run: |
+          NPM_VERSION=$(npm -v)
+          echo "current npm: $NPM_VERSION"
+          if [ "$(printf '%s\n11.5.1' "$NPM_VERSION" | sort -V | head -n1)" != "11.5.1" ]; then
+            npm install -g npm@11 --force
+          fi
+          npm -v
 
       - run: npm ci
       - run: npm run build:prod

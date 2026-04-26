@@ -39,4 +39,4 @@ export const STORAGE_KEYS = Object.freeze({
 });
 
 export const SDK_PLATFORM = 'web';
-export const SDK_VERSION = '1.0.2';
+export const SDK_VERSION = '1.0.3';

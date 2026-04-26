@@ -1,6 +1,6 @@
 {
   "name": "oximetric",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Lightweight, privacy-friendly visitor analytics for any website. Works with the self-hosted Oximetric server. Zero runtime dependencies, works in every browser, drop-in script tag or ESM import.",
   "type": "module",
   "main": "./dist/oximetric.cjs",
