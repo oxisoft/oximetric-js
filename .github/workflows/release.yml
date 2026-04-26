@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write    # create GitHub release
+  id-token: write    # npm provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      # Trusted Publishing requires npm 11.5.1+ (OIDC support).
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+      - run: npm run build:prod
+
+      - name: Verify tag matches package.json
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::tag $TAG_VERSION does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      # No NODE_AUTH_TOKEN: npm exchanges the GitHub OIDC token for a
+      # short-lived publish token via Trusted Publishing. Configure the
+      # trusted publisher at https://www.npmjs.com/package/oximetric/access
+      - name: Publish to npm
+        run: npm publish --access public
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/oximetric.min.js
+            dist/oximetric.min.js.map
+            dist/oximetric.esm.js
+            dist/oximetric.esm.js.map
+            dist/oximetric.esm.min.js
+            dist/oximetric.esm.min.js.map
+            dist/oximetric.cjs
+            dist/oximetric.cjs.map
+            dist/oximetric.umd.min.js
+            dist/oximetric.umd.min.js.map

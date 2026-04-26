@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build:prod
+
+      - name: Verify dist artifacts
+        run: |
+          test -s dist/oximetric.min.js
+          test -s dist/oximetric.esm.js
+          test -s dist/oximetric.esm.min.js
+          test -s dist/oximetric.cjs
+          test -s dist/oximetric.umd.min.js
+
+      - name: Smoke test ESM
+        run: |
+          node --input-type=module -e "import('./dist/oximetric.esm.js').then(m => { if (!m.OxiMetric || typeof m.OxiMetric.init !== 'function') process.exit(1); })"
+
+      - name: Print sizes
+        run: |
+          ls -la dist/
+          for f in dist/*.js; do
+            printf "%-40s %s\n" "$f" "$(wc -c < "$f") bytes"
+          done

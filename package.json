@@ -1,0 +1,65 @@
+{
+  "name": "oximetric",
+  "version": "0.1.0",
+  "description": "Lightweight, privacy-friendly visitor analytics for any website. Works with the self-hosted Oximetric server. Zero runtime dependencies, works in every browser, drop-in script tag or ESM import.",
+  "type": "module",
+  "main": "./dist/oximetric.cjs",
+  "module": "./dist/oximetric.esm.js",
+  "browser": "./dist/oximetric.min.js",
+  "exports": {
+    ".": {
+      "import": "./dist/oximetric.esm.js",
+      "require": "./dist/oximetric.cjs",
+      "default": "./dist/oximetric.esm.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:prod": "OXIMETRIC_BUILD=production node scripts/build.mjs",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build:prod"
+  },
+  "keywords": [
+    "analytics",
+    "tracking",
+    "metrics",
+    "visitors",
+    "pageviews",
+    "events",
+    "privacy",
+    "oximetric",
+    "self-hosted",
+    "gdpr",
+    "first-party",
+    "cookieless",
+    "tracker",
+    "lightweight",
+    "telemetry"
+  ],
+  "homepage": "https://github.com/oxisoft/oximetric-js#readme",
+  "bugs": {
+    "url": "https://github.com/oxisoft/oximetric-js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oxisoft/oximetric-js.git"
+  },
+  "author": "OxiSoft",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

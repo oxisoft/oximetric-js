@@ -1,0 +1,9 @@
+.github/
+examples/
+scripts/
+src/
+.editorconfig
+.gitignore
+*.log
+*.tgz
+node_modules/

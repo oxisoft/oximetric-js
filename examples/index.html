@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Oximetric JS — Examples</title>
+  <meta name="description" content="Live examples of every tracking feature in the Oximetric JS analytics SDK: pageviews, outbound links, downloads, forms, custom events, identify, consent mode, and SPA routing.">
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 880px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { margin: 0 0 .25rem; }
+    h2 { border-top: 1px solid #ddd3; padding-top: 1.5rem; margin-top: 2rem; }
+    h3 { margin-bottom: .25rem; }
+    code, pre, kbd { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+    pre { background: #8881; padding: .75rem; border-radius: 6px; overflow-x: auto; }
+    .row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: .5rem 0; }
+    button, input, select { font: inherit; padding: .4rem .75rem; border-radius: 6px; border: 1px solid #8884; background: transparent; cursor: pointer; }
+    button { background: #4a86ff; color: white; border-color: #4a86ff; }
+    button.secondary { background: transparent; color: inherit; }
+    button:hover { filter: brightness(1.05); }
+    .small { font-size: 12px; color: #888; }
+    fieldset { border: 1px solid #8884; border-radius: 6px; padding: .75rem 1rem; margin: 0; }
+    legend { font-weight: 600; padding: 0 .25rem; }
+    label { display: inline-block; margin-right: .75rem; }
+    #log { height: 280px; overflow-y: auto; background: #1117; color: #cfc; padding: .5rem .75rem; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #4a86ff22; color: #4a86ff; font-size: 12px; }
+    a.btn-link { display: inline-block; padding: .35rem .65rem; border: 1px solid #8884; border-radius: 6px; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<h1>Oximetric JS — Examples</h1>
+<p class="small">All tracking features on a single page. Open the network tab to see requests to <code>/api/v1/track</code>, <code>/api/v1/device</code>, and <code>/api/v1/identify</code>.</p>
+
+<!-- =================================================================== -->
+<!-- 1. Configuration -->
+<!-- =================================================================== -->
+
+<h2>1. Configure</h2>
+<p>Fill in your server URL and a project token from the Oximetric console. The token's allowed-origins must include the origin this page is served from.</p>
+
+<fieldset>
+  <legend>SDK config</legend>
+  <div class="row">
+    <label>Server <input id="cfg-server" placeholder="https://analytics.example.com" size="38"></label>
+    <label>Token <input id="cfg-token" placeholder="pk_xxx" size="38"></label>
+  </div>
+  <div class="row">
+    <label><input type="checkbox" id="cfg-consent"> Start in <code>consent: required</code> mode</label>
+  </div>
+  <div class="row">
+    <label>Storage
+      <select id="cfg-storage">
+        <option value="auto">auto (localStorage + cookie)</option>
+        <option value="localStorage">localStorage only</option>
+        <option value="cookie">cookie only</option>
+        <option value="memory">memory (session)</option>
+        <option value="none">none</option>
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <button id="btn-init">Initialize SDK</button>
+    <button id="btn-shutdown" class="secondary">Shutdown</button>
+    <span id="state" class="pill">not initialized</span>
+  </div>
+  <p class="small">For drop-in script-tag usage, see the snippet at the bottom of this page.</p>
+</fieldset>
+
+<!-- =================================================================== -->
+<!-- 2. Custom events -->
+<!-- =================================================================== -->
+
+<h2>2. Custom events</h2>
+<p>Properties are auto-typed: strings, ints, floats, booleans, and Date instances.</p>
+
+<fieldset>
+  <legend>Manual track()</legend>
+  <div class="row">
+    <button onclick="OxiMetric.track('button_clicked', { label: 'Hello' })">track('button_clicked')</button>
+    <button onclick="OxiMetric.track('purchase', { plan: 'pro', amount: 29.99, items: 3, recurring: true, signed_up_at: new Date() })">track('purchase') — typed props</button>
+    <button onclick="OxiMetric.track('search', { query: document.getElementById('q').value })">track('search')</button>
+    <input id="q" placeholder="search query…">
+  </div>
+  <div class="row">
+    <button onclick="OxiMetric.flush()">flush() now</button>
+    <span class="small">Otherwise the queue flushes every 5s or on page unload.</span>
+  </div>
+</fieldset>
+
+<!-- =================================================================== -->
+<!-- 3. Pageviews -->
+<!-- =================================================================== -->
+
+<h2>3. Pageviews & SPA routing</h2>
+<p>Pageviews fire automatically on load and on every <code>history.pushState</code> / <code>replaceState</code> / <code>popstate</code> / <code>hashchange</code>. To verify, click below — each click pushes a fake route and emits a pageview.</p>
+
+<fieldset>
+  <legend>Simulate SPA navigation</legend>
+  <div class="row">
+    <button onclick="history.pushState({}, '', '/examples/products')">/products</button>
+    <button onclick="history.pushState({}, '', '/examples/cart')">/cart</button>
+    <button onclick="history.pushState({}, '', '/examples/checkout?ref=hero&utm_source=demo')">/checkout?utm</button>
+    <button onclick="history.back()">Back</button>
+  </div>
+  <div class="row">
+    <button onclick="location.hash = '#section-' + Math.floor(Math.random()*100)">Push hash</button>
+    <button onclick="OxiMetric.pageview({ path: '/manual', title: 'Manual pageview' })">Manual pageview()</button>
+  </div>
+</fieldset>
+
+<!-- =================================================================== -->
+<!-- 4. Outbound links and downloads -->
+<!-- =================================================================== -->
+
+<h2>4. Outbound links & downloads</h2>
+<p>Anchors with a host that differs from this page emit an <code>outbound_link</code> event. Anchors ending in known download extensions (or carrying the <code>download</code> attribute) emit a <code>download</code> event. Both are detected via a single delegated click listener.</p>
+
+<fieldset>
+  <legend>Try it</legend>
+  <div class="row">
+    <a class="btn-link" href="https://example.com/" target="_blank" rel="noopener">External link → example.com</a>
+    <a class="btn-link" href="https://github.com/oxisoft/oximetric-js" target="_blank" rel="noopener">External → GitHub</a>
+    <a class="btn-link" href="/examples/sample.pdf">Inline PDF download</a>
+    <a class="btn-link" href="/examples/report.csv" download>CSV with download attr</a>
+    <a class="btn-link" href="/examples/install.dmg">.dmg installer</a>
+    <a class="btn-link" href="#anchor-only">Same-page anchor (ignored)</a>
+  </div>
+</fieldset>
+
+<!-- =================================================================== -->
+<!-- 5. Forms -->
+<!-- =================================================================== -->
+
+<h2>5. Form submissions</h2>
+<p>Any <code>&lt;form&gt;</code> submit event captures the form's <code>id</code>, <code>name</code>, <code>action</code>, and <code>method</code>.</p>
+
+<fieldset>
+  <legend>Test form</legend>
+  <form id="newsletter" name="newsletter-signup" action="/examples/subscribe" method="POST" onsubmit="event.preventDefault(); this.reset();">
+    <div class="row">
+      <input type="email" name="email" placeholder="you@example.com" required>
+      <select name="frequency">
+        <option>Daily</option><option>Weekly</option><option>Monthly</option>
+      </select>
+      <button type="submit">Subscribe</button>
+    </div>
+  </form>
+</fieldset>
+
+<!-- =================================================================== -->
+<!-- 6. Identify -->
+<!-- =================================================================== -->
+
+<h2>6. Identifying users</h2>
+<p>The identifier is hashed with SHA-256 in the browser before transport. Use any opaque value — email, user id, hash. Subsequent events are linked to the resulting user id.</p>
+
+<fieldset>
+  <legend>identify() / reset()</legend>
+  <div class="row">
+    <input id="user-id" placeholder="user@example.com" size="32">
+    <button onclick="OxiMetric.identify(document.getElementById('user-id').value)">identify()</button>
+    <button class="secondary" onclick="OxiMetric.reset()">reset()</button>
+    <span class="small">Current user id: <code id="uid-display">—</code></span>
+  </div>
+</fieldset>
+
+<!-- =================================================================== -->
+<!-- 7. Consent flow -->
+<!-- =================================================================== -->
+
+<h2>7. Consent flow</h2>
+<p>If you initialized in <code>consent: required</code> mode, calls to <code>track()</code> are buffered and not transmitted until <code>optIn()</code>. Use this to integrate with a cookie banner.</p>
+
+<fieldset>
+  <legend>Consent banner</legend>
+  <div class="row">
+    <button onclick="OxiMetric.optIn()">Accept (optIn)</button>
+    <button class="secondary" onclick="OxiMetric.optOut()">Decline (optOut)</button>
+    <span class="small">hasConsent: <code id="consent-state">—</code></span>
+  </div>
+</fieldset>
+
+<!-- =================================================================== -->
+<!-- 8. Drop-in script tag -->
+<!-- =================================================================== -->
+
+<h2>8. Drop-in <code>&lt;script&gt;</code> tag</h2>
+<p>Most production sites can use the script-tag form, no JavaScript required:</p>
+
+<pre><code>&lt;script defer
+  src="https://cdn.jsdelivr.net/npm/oximetric/dist/oximetric.min.js"
+  data-server="https://analytics.example.com"
+  data-token="pk_xxx"
+  data-auto-track="pageviews,outbound,downloads,forms"
+  data-consent="granted"
+  data-storage="auto"
+  data-cookie-domain="auto"
+  data-log-level="warn"&gt;&lt;/script&gt;</code></pre>
+
+<h2>Live log</h2>
+<div id="log" aria-live="polite"></div>
+
+<!-- =================================================================== -->
+
+<!-- Local build of the SDK. Run `npm run build` first.
+     For the script-tag form replace this with the CDN URL. -->
+<script type="module">
+  import { OxiMetric } from '../dist/oximetric.esm.js';
+  window.OxiMetric = OxiMetric;
+
+  // tiny logger that mirrors network requests in the on-page console
+  const log = (msg, ...rest) => {
+    const el = document.getElementById('log');
+    const t = new Date().toLocaleTimeString();
+    el.textContent = `[${t}] ${msg} ${rest.map(r => typeof r === 'object' ? JSON.stringify(r) : r).join(' ')}\n` + el.textContent;
+  };
+
+  // monkey-patch fetch so example viewers can see what's flying.
+  const origFetch = window.fetch;
+  window.fetch = async (input, init) => {
+    const url = typeof input === 'string' ? input : input.url;
+    if (url.includes('/api/v1/')) {
+      log('→', init?.method || 'GET', url, init?.body ? JSON.parse(init.body) : '');
+    }
+    const res = await origFetch(input, init);
+    if (url.includes('/api/v1/')) log('←', res.status, url);
+    return res;
+  };
+
+  function refreshState() {
+    document.getElementById('state').textContent =
+      OxiMetric.isInitialized ? `initialized (${OxiMetric.hasConsent ? 'consented' : 'awaiting consent'})` : 'not initialized';
+    document.getElementById('uid-display').textContent = OxiMetric.userId ?? '—';
+    document.getElementById('consent-state').textContent = OxiMetric.hasConsent ? 'true' : 'false';
+  }
+  setInterval(refreshState, 500);
+
+  document.getElementById('btn-init').addEventListener('click', async () => {
+    const server = document.getElementById('cfg-server').value.trim();
+    const token = document.getElementById('cfg-token').value.trim();
+    if (!server || !token) { alert('Fill in server URL and token first.'); return; }
+    if (OxiMetric.isInitialized) OxiMetric.shutdown();
+    try {
+      await OxiMetric.init({
+        serverUrl: server,
+        token,
+        consent: document.getElementById('cfg-consent').checked ? 'required' : 'granted',
+        storage: document.getElementById('cfg-storage').value,
+        logLevel: 'debug',
+      });
+      log('SDK initialized; deviceId =', OxiMetric.deviceId);
+    } catch (e) {
+      log('init failed:', e.message);
+    }
+  });
+
+  document.getElementById('btn-shutdown').addEventListener('click', () => {
+    OxiMetric.shutdown();
+    log('SDK shut down');
+  });
+</script>
+
+</body>
+</html>
